@@ -1,3 +1,5 @@
+#Learning React by building a time tracking app
+
 ### Running the app
 
 1. Ensure you have `npm` installed.

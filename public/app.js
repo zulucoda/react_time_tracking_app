@@ -215,11 +215,17 @@ const ToggleableTimerForm = React.createClass({
 });
 
 const Timer = React.createClass({
+  componentDidMount : function () {
+    this.forceUpdateInterval = setInterval(()=> this.forceUpdate(), 50);
+  },
+  componentWillUnmount: function () {
+    clearInterval(this.forceUpdateInterval);
+  },
   handleOnDeleteClick: function () {
     this.props.onDeleteClick(this.props.id);
   },
   render: function () {
-    const elapsedString = helpers.renderElapsedString(this.props.elapsed);
+    const elapsedString = helpers.renderElapsedString(this.props.elapsed, this.props.runningSince);
     return (
       <div className="ui centered card">
         <div className="content">

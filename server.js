@@ -36,6 +36,8 @@ app.post('/api/timers', (req, res) => {
       res.json(timers);
     });
   });
+
+  // res.status(400).send({ error: 'something blew up' });
 });
 
 app.post('/api/timers/start', (req, res) => {

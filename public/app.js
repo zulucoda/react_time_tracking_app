@@ -1,7 +1,9 @@
 const TimersDashboard = React.createClass({
   getInitialState: function() {
     return {
-        timers: []
+        timers: [],
+        error: null,
+        isFormOpen: false
     }
   },
   componentDidMount: function () {
@@ -17,11 +19,20 @@ const TimersDashboard = React.createClass({
     this.createTimer(timer);
   },
   createTimer: function (timer) {
+    this.handleFormClose();
     const t = helpers.newTimer(timer);
     this.setState({
       timers: this.state.timers.concat(t)
     });
-    client.createTimer(t);
+    client.createTimer(t).catch((error) => {
+      this.showErrors(error);
+      this.handleFormOpen();
+    });
+  },
+  showErrors: function (error) {
+    this.setState({
+      error: error.message
+    });
   },
   handleEditFormSubmit: function (attrs) {
     this.updateTimer(attrs);
@@ -38,7 +49,7 @@ const TimersDashboard = React.createClass({
           return timer;
         }
       })
-    })
+    });
 
     client.updateTimer({id: attrs.id, title: attrs.title, project: attrs.project});
   },
@@ -96,18 +107,34 @@ const TimersDashboard = React.createClass({
 
     client.stopTimer({id: timerId, stop: now});
   },
+  handleFormOpen: function() {
+    this.setState({ isFormOpen: true });
+  },
+  handleFormClose: function(){
+    this.setState({ isFormOpen: false });
+  },
   render: function () {
     return (
       <div className="ui three column centered grid">
         <div className="column">
+          <div className="ui raised segment">
+            <p>{this.state.error}</p>
+          </div>
           <EditableTimerList
             timers={this.state.timers}
             onFormSubmit={this.handleEditFormSubmit}
             onDeleteTimer={this.handleDelete}
             onStartTimer={this.handleStartTimer}
             onStopTimer={this.handleStopTimer}
+            isFormOpen={this.state.isFormOpen}
           />
-          <ToggleableTimerForm onFormSubmit={this.handleCreateFormSubmit} />
+          <ToggleableTimerForm
+            onFormSubmit={this.handleCreateFormSubmit}
+            onError={this.state.error}
+            isFormOpen={this.state.isFormOpen}
+            onFormOpen={this.handleFormOpen}
+            onFormClose={this.handleFormClose}
+          />
         </div>
       </div>
     );
@@ -202,10 +229,15 @@ const TimeForm = React.createClass({
   },
   render: function () {
     const submitText = this.props.id ? 'Update' : 'Create';
+    const showError = this.props.onError ? (<div className="ui error message">
+      <div className="header">Create Timer Error</div>
+    <p>{this.props.onError}</p>
+    </div>) : '';
     return (
       <div className="ui centered card">
         <div className="content">
-          <div className="ui form">
+          <div className="ui form error">
+            {showError}
             <div className="field">
               <label htmlFor="">Title</label>
               <input type="text" defaultValue={this.props.title}
@@ -228,27 +260,22 @@ const TimeForm = React.createClass({
 });
 
 const ToggleableTimerForm = React.createClass({
-  getInitialState: function() {
-    return {
-      isOpen: false
-    }
-  },
-  handleFormOpen: function() {
-    this.setState({ isOpen: true });
-  },
-  handleFormClose: function(timer){
-    this.setState({ isOpen: false });
-  },
   handleFormSubmit: function(timer){
     this.props.onFormSubmit(timer);
-    this.setState({ isOpen: false });
+  },
+  handleFormOpen: function() {
+    this.props.onFormOpen();
+  },
+  handleFormClose: function(){
+    this.props.onFormClose();
   },
   render: function () {
-    if(this.state.isOpen){
+    if(this.props.isFormOpen){
      return (
       <TimeForm
         onFormSubmit={this.handleFormSubmit}
         onFormClose={this.handleFormClose}
+        onError={this.props.onError}
       />
      );
     } else {

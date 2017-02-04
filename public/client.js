@@ -19,7 +19,8 @@ window.client = (function () {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-    }).then(checkStatus);
+    }).then(checkStatus)
+      .catch(onError);
   }
 
   function updateTimer(data) {
@@ -55,6 +56,10 @@ window.client = (function () {
     }).then(checkStatus);
   }
 
+  function onError (error) {
+    throw new Error(`An error occurred ${error.message}`);
+  }
+
   function stopTimer(data) {
     return fetch('/api/timers/stop', {
       method: 'post',
@@ -63,7 +68,8 @@ window.client = (function () {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-    }).then(checkStatus);
+    }).then(checkStatus)
+      .catch(onError);
   }
 
   function checkStatus(response) {

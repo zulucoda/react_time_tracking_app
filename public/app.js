@@ -149,7 +149,7 @@ const TimeForm = React.createClass({
             </div>
             <div className="ui two bottom attached buttons">
               <button className="ui basic blue button" onClick={this.handleFormSubmit}>{submitText}</button>
-              <button className="ui basic red button" onClick={this.onFormClose}>Cancel</button>
+              <button className="ui basic red button" onClick={this.props.onFormClose}>Cancel</button>
             </div>
           </div>
         </div>
